@@ -13,9 +13,9 @@ namespace MRS.Service
         IEnumerable<Category> GetCategorys();
         IEnumerable<Category> GetCategorys(Expression<Func<Category, bool>> where);
         Category GetCategory(Guid id);
-        void CreateCategory(Category Category);
-        void EditCategory(Category Category);
-        void RemoveCategory(Category Category);
+        void CreateCategory(Category Category, string username);
+        void EditCategory(Category Category, string username);
+        void RemoveCategory(Category Category, string username);
         void SaveCategory();
     }
 
@@ -30,16 +30,18 @@ namespace MRS.Service
             this._unitOfWork = unitOfWork;
         }
 
-        public void CreateCategory(Category Category)
+        public void CreateCategory(Category Category, string username)
         {
+            Category.DateCreated = DateTime.Now;
+            Category.UserCreated = username;
             _CategoryRepository.Add(Category);
         }
 
-        public void EditCategory(Category Category)
+        public void EditCategory(Category Category, string username)
         {
-            var entity = _CategoryRepository.GetById(Category.Id);
-            entity = Category;
-            _CategoryRepository.Update(entity);
+            Category.DateUpdated = DateTime.Now;
+            Category.UserUpdated = username;
+            _CategoryRepository.Update(Category);
         }
 
         public Category GetCategory(Guid id)
@@ -57,10 +59,10 @@ namespace MRS.Service
             _unitOfWork.Commit();
         }
 
-        public void RemoveCategory(Category Category)
+        public void RemoveCategory(Category Category, string username)
         {
             Category.IsDelete = true;
-            EditCategory(Category);
+            EditCategory(Category, username);
         }
 
         public IEnumerable<Category> GetCategorys(Expression<Func<Category, bool>> where)

@@ -14,6 +14,7 @@ namespace MRS.Model
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
         public string Description { get; set; }
+        public string ActiveTime { get; set; }
         public bool IsDelete { get; set; }
         public DateTime DateCreated { get; set; }
         public string UserCreated { get; set; }

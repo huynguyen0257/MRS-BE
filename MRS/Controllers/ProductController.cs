@@ -15,7 +15,7 @@ namespace MRS.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        public IProductService _productService { get; set; }
+        private readonly IProductService _productService;
 
         public ProductController(IProductService productService)
         {
@@ -63,6 +63,7 @@ namespace MRS.Controllers
                 var product = model.Adapt<Product>();
                 product.DateCreated = DateTime.Now;
                 _productService.CreateProduct(product,null);
+                _productService.SaveProduct();
                 return StatusCode(201);
             }
             catch (Exception ex)
@@ -81,6 +82,7 @@ namespace MRS.Controllers
                 {
                     product = model.Adapt(product);
                     _productService.EditProduct(product,null);
+                    _productService.SaveProduct();
                     return Ok();
                 }
                 else
@@ -103,6 +105,7 @@ namespace MRS.Controllers
                 if (product != null)
                 {
                     _productService.RemoveProduct(product,null);
+                    _productService.SaveProduct();
                     return Ok();
                 }
                 else

@@ -13,9 +13,9 @@ namespace MRS.Service
         IEnumerable<Shop> GetShops();
         IEnumerable<Shop> GetShops(Expression<Func<Shop, bool>> where);
         Shop GetShop(Guid id);
-        void CreateShop(Shop Shop);
-        void EditShop(Shop Shop);
-        void RemoveShop(Shop Shop);
+        void CreateShop(Shop Shop, string username);
+        void EditShop(Shop Shop, string username);
+        void RemoveShop(Shop Shop, string username);
         void SaveShop();
     }
 
@@ -30,16 +30,18 @@ namespace MRS.Service
             this._unitOfWork = unitOfWork;
         }
 
-        public void CreateShop(Shop Shop)
+        public void CreateShop(Shop Shop, string username)
         {
+            Shop.DateCreated = DateTime.Now;
+            Shop.UserCreated = username;
             _ShopRepository.Add(Shop);
         }
 
-        public void EditShop(Shop Shop)
+        public void EditShop(Shop Shop, string username)
         {
-            var entity = _ShopRepository.GetById(Shop.Id);
-            entity = Shop;
-            _ShopRepository.Update(entity);
+            Shop.DateUpdated = DateTime.Now;
+            Shop.UserUpdated = username;
+            _ShopRepository.Update(Shop);
         }
 
         public Shop GetShop(Guid id)
@@ -57,10 +59,10 @@ namespace MRS.Service
             _unitOfWork.Commit();
         }
 
-        public void RemoveShop(Shop Shop)
+        public void RemoveShop(Shop Shop, string username)
         {
             Shop.IsDelete = true;
-            EditShop(Shop);
+            EditShop(Shop, username);
         }
 
         public IEnumerable<Shop> GetShops(Expression<Func<Shop, bool>> where)
