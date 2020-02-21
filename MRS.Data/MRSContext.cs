@@ -11,7 +11,9 @@ namespace MRS.Data
     {
         public MRSContext() : base((new DbContextOptionsBuilder())
             .UseLazyLoadingProxies()
-            .UseSqlServer(@"Server=.;Database=MRSDB;user id=sa;password=1;Trusted_Connection=True;Integrated Security=false;")
+            //.UseSqlServer(@"Server=localhost;Database=MRSDB;user id=sa;password=1234;Trusted_Connection=True;Integrated Security=false;") //Huy
+            //.UseSqlServer(@"Server=.;Database=MRSDB;user id=sa;password=1;Trusted_Connection=True;Integrated Security=false;") //Bình
+            .UseSqlServer(@"Server=mlh2.database.windows.net;Database=MRSDB;user id=minh;password=tyz#25071998;Trusted_Connection=True;Integrated Security=false;") //Server
             .Options)
         {
 

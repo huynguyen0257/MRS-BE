@@ -27,9 +27,9 @@ namespace MRS.Controllers
         {
             try
             {
-                var test = new List<Category> { new Category() { Name = "Test Cat", Id = Guid.NewGuid() } };
-                //return Ok(_categoryService.GetCategorys(c => !c.IsDelete).Select(c => c.Adapt<CategoryVM>()));
-                return Ok(test);
+                //var test = new List<Category> { new Category() { Name = "Test Cat", Id = Guid.NewGuid() } };
+                return Ok(_categoryService.GetCategorys(c => !c.IsDelete).Select(c => c.Adapt<CategoryVM>()));
+                //return Ok(test);
             }
             catch (Exception ex)
             {
