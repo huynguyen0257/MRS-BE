@@ -15,6 +15,10 @@ namespace MRS.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
+        public class Error
+        {
+            public string Message { get; set; }
+        }
         private readonly IProductService _productService;
 
         public ProductController(IProductService productService)
@@ -62,6 +66,11 @@ namespace MRS.Controllers
             {
                 var product = model.Adapt<Product>();
                 product.DateCreated = DateTime.Now;
+                product.WareHouse = new WareHouse
+                {
+                    Quantity = model.Quantity,
+                    Avaiable = model.Quantity
+                };
                 _productService.CreateProduct(product,null);
                 _productService.SaveProduct();
                 return StatusCode(201);
@@ -75,24 +84,45 @@ namespace MRS.Controllers
         [HttpPut]
         public ActionResult Update(ProductUM model)
         {
+            var error = new Error();
             try
             {
                 var product = _productService.GetProduct(model.Id);
                 if (product != null)
                 {
                     product = model.Adapt(product);
+                    if (product.WareHouse != null)
+                    {
+                        var warehouse = product.WareHouse;
+                        var avaiable = model.Quantity - warehouse.Ordered - warehouse.Purchased;
+                        if (avaiable < 0)
+                        {
+                            //error.Message += "Khong duoc giam Quantity";
+                            //return BadRequest(error);
+                            throw new Exception("Khong update duoc vi so luong hang trong kho kha dung la: " + warehouse.Avaiable);
+                        }
+                        warehouse.Quantity = model.Quantity;
+                        warehouse.Avaiable = avaiable;
+                    }
                     _productService.EditProduct(product,null);
                     _productService.SaveProduct();
-                    return Ok();
                 }
                 else
                 {
-                    return BadRequest("ProductId sai");
+                    error.Message += "ProductId sai";
                 }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                error.Message += ex.Message;
+            }
+            if (String.IsNullOrEmpty(error.Message))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(error);
             }
         }
 

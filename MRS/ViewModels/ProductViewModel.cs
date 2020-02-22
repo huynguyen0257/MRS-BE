@@ -13,20 +13,23 @@ namespace MRS.ViewModels
         public int NumberOfLike { get; set; }
     }
     
-    public class ProductDetailVM : ProductUM
+    public class ProductDetailVM : ProductUM // Đuọc xem khong duoc Update
     {
         public int NumberOfLike { get; set; }
+        public int Avaiable { get; set; }
+        public int Ordered { get; set; }
+        public int Purchased { get; set; }
         public DateTime DateCreated { get; set; }
+
     }
 
     public class ProductCM
     {
         public string Name { get; set; }
         public float Price { get; set; }
+        public int Quantity { get; set; }
         public string Description { get; set; }
-        public int NumberOfLike { get; set; }
         public Guid CategoryId { get; set; }
-        public DateTime DateCreated { get; set; }
     }
     public class ProductUM
     {
@@ -34,6 +37,7 @@ namespace MRS.ViewModels
         public string Name { get; set; }
         public float Price { get; set; }
         public string Description { get; set; }
+        public int Quantity { get; set; }
         public Guid CategoryId { get; set; }
     }
 }

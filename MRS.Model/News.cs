@@ -13,6 +13,8 @@ namespace MRS.Model
         public Guid Id { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
+        public string Review { get; set; }
+        public bool IsHided { get; set; }
         public DateTime DateCreated { get; set; }
         public string UserCreated { get; set; }
         public DateTime? DateUpdated { get; set; }

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MRS.Adapter;
 using MRS.Data.Infrastructure;
 using MRS.Data.Repositories;
 using MRS.Service;
@@ -50,6 +51,12 @@ namespace MRS
             //Shop
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<ICategoryService, CategoryService>();
+
+            services.AddTransient<IWareHouseRepository, WareHouseRepository>();
+            services.AddTransient<IWareHouseService, WareHouseService>();
+
+            services.AddTransient<INewsRepository, NewsRepository>();
+            services.AddTransient<INewsService, NewsService>();
             #endregion
 
             #region Swagger
@@ -101,6 +108,11 @@ namespace MRS
                         In = SwaggerSecurityApiKeyLocation.Header
                     }));
             });
+            #endregion
+
+            #region MapsterConfig
+            MapsterConfig mapsterConfig = new MapsterConfig();
+            mapsterConfig.Run();
             #endregion
 
             app.UseHttpsRedirection();
