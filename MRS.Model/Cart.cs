@@ -19,13 +19,23 @@ namespace MRS.Model
         public DateTime? DateUpdated { get; set; }
         public string UserUpdated { get; set; }
 
+        public Guid ProductId { get; set; }
+        public string ProductName { get; set; }
+
         #region relationship
         public string UserId { get; set; }
         public virtual User User { get; set; }
         public Guid WareHouseId { get; set; }
         public virtual WareHouse WareHouse { get; set; }
-        public Guid OrderId { get; set; }
+        public Guid? OrderId { get; set; }
         public virtual Order Order { get; set; }
         #endregion
+
+    }
+
+    public enum CartStatus
+    {
+        waiting,
+        ordered
     }
 }
