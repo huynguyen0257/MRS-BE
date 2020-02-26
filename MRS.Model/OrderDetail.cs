@@ -22,6 +22,9 @@ namespace MRS.Model
         public DateTime? DateUpdated { get; set; }
         public string UserUpdated { get; set; }
 
+        public Guid ProductId { get; set; }
+        public string ProductName { get; set; }
+
         #region Relationship
         public Guid OrderId { get; set; }
         public virtual Order Order { get; set; }

@@ -13,7 +13,7 @@ using MRS.ViewModels;
 
 namespace MRS.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [Route("api/[controller]")]
     [ApiController]
     public class CartController : ControllerBase
@@ -36,7 +36,7 @@ namespace MRS.Controllers
         {
             try
             {
-                return Ok(_CartService.GetCarts().Select(c => c.Adapt<CartVM>()));
+                return Ok(_CartService.GetCarts(_ => _.UserId == _userManager.GetUserAsync(User).Result.Id).Select(c => c.Adapt<CartVM>()));
             }
             catch (Exception ex)
             {
@@ -49,20 +49,14 @@ namespace MRS.Controllers
         {
             try
             {
+                var user = _userManager.GetUserAsync(User).Result;
                 var Cart = model.Adapt<Cart>();
                 Cart.DateCreated = DateTime.Now;
                 var warehouse = _wareHouseService.GetWareHouses(w => w.ProductId == model.ProductId).FirstOrDefault();
                 if (warehouse == null) return NotFound(new { Message = "Khong tim thay Product" });
+                if (_CartService.GetCarts(_ => _.ProductId == model.ProductId && _.UserId == user.Id).Count() != 0) return BadRequest(new { Message = "User nay da add Product roi ==> Update Quantity di!"});
                 Cart.WareHouse = warehouse;
-                var user = _userManager.GetUserAsync(User).Result;
-                if (user != null)
-                {
-                    _CartService.CreateCart(Cart, user.FullName);
-                }
-                else
-                {
-                    _CartService.CreateCart(Cart, null);
-                }
+                _CartService.CreateCart(Cart, user.FullName, user.Id);
                 _CartService.SaveCart();
                 return StatusCode(201);
             }
@@ -87,7 +81,7 @@ namespace MRS.Controllers
                     if (warehouse == null) return NotFound(new { Message = "Khong tim thay Product" });
                     cart.WareHouse = warehouse;
                     var user = _userManager.GetUserAsync(User).Result;
-                    _CartService.CreateCart(cart, user.FullName);
+                    _CartService.CreateCart(cart, user.FullName, user.Id);
                     ids.Add(cart.Id);
                 }
                 _CartService.SaveCart();
@@ -175,21 +169,32 @@ namespace MRS.Controllers
         [HttpPost("Order")]
         public ActionResult Order([FromBody]OrderCM model)
         {
-            var cart = _CartService.GetCarts(_ => model.CartIds.Contains(_.Id)).ToList();
-            if (cart.Count() != model.CartIds.Count)
+            try
             {
-                string idError = "";
-                foreach (var cartId in model.CartIds)
+                var cart = _CartService.GetCarts(_ => model.CartIds.Contains(_.Id)).ToList();
+                if (cart.Count() != model.CartIds.Count)
                 {
-                    if (cart.Where(_ => _.Id == cartId).FirstOrDefault() == null) idError += cartId + "\t,";
+                    string idError = "";
+                    foreach (var cartId in model.CartIds)
+                    {
+                        if (cart.Where(_ => _.Id == cartId).FirstOrDefault() == null) idError += cartId + "\t,";
+                    }
+                    if (!String.IsNullOrEmpty(idError))
+                    {
+                        return BadRequest(new { Message = "CartId not exist : " + idError });
+                    }
                 }
-                return BadRequest(new { Message = "CartId not exist : " + idError });
+                var order = model.Adapt<Order>();
+                order.Carts = cart;
+                _orderService.CreateOrder(order, _userManager.GetUserAsync(User).Result.FullName);
+                _orderService.SaveOrder();
+                return Ok();
             }
-            var order = model.Adapt<Order>();
-            order.Carts = cart;
-            _orderService.CreateOrder(order, _userManager.GetUserAsync(User).Result.FullName);
-
-            return Ok();
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            
         }
         #endregion
 

@@ -13,7 +13,7 @@ namespace MRS.Service
         IEnumerable<Cart> GetCarts();
         IEnumerable<Cart> GetCarts(Expression<Func<Cart, bool>> where);
         Cart GetCart(Guid id);
-        void CreateCart(Cart Cart, string username);
+        void CreateCart(Cart Cart, string username, string userId);
         void EditCart(Cart Cart, string username, int oldQuantity);
         void RemoveCart(Cart Cart);
         void RemoveCart(Guid id);
@@ -35,7 +35,7 @@ namespace MRS.Service
             _unitOfWork = unitOfWork;
         }
 
-        public void CreateCart(Cart Cart, string username)
+        public void CreateCart(Cart Cart, string username, string userId)
         {
             var warehouse = Cart.WareHouse;
             if (warehouse == null) throw new Exception("Chua tim thay product");
@@ -43,6 +43,7 @@ namespace MRS.Service
             //AutoUpdateWarehouse(warehouse, null, Cart.Quantity, null, null);
             //_wareHouseRepository.Update(warehouse);
             AutoUpdateValue(Cart);
+            Cart.UserId = userId;
             Cart.UserCreated = username;
             Cart.DateCreated = DateTime.Now;
             _CartRepository.Add(Cart);
@@ -51,7 +52,7 @@ namespace MRS.Service
         public void EditCart(Cart Cart, string username, int oldQuantity)
         {
             var warehouse = Cart.WareHouse;
-            if (Cart.Quantity > oldQuantity && Cart.Quantity - oldQuantity > warehouse.Avaiable)
+            if (Cart.Quantity > warehouse.Avaiable)
                 throw new Exception("Hang trong kho khong du");
             Cart.Price = _productRepository.GetById(Cart.ProductId).Price * Cart.Quantity;
             //var increaseQuantity = Cart.Quantity - oldQuantity;

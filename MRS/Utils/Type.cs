@@ -10,7 +10,7 @@ namespace MRS.Utils
         [Display(Name = "Quản lý")]
         Admin = 0,
         [Display(Name = "Khách hàng")]
-        Customer = 5,
+        Customer = 1,
     }
 
     public static class RolesExtenstions

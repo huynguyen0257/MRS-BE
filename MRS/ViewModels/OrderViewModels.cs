@@ -22,4 +22,19 @@ namespace MRS.ViewModels
         public string Note { get; set; }
         public List<CartVM> CartVMs { get; set; }
     }
+
+    public class OrderDetailsVM
+    {
+        public int Quantity { get; set; }
+        public float Price { get; set; }
+        public int Status { get; set; }
+        public DateTime DateCreated { get; set; }
+        public string UserCreated { get; set; }
+        public DateTime? DateUpdated { get; set; }
+        public string UserUpdated { get; set; }
+
+        public Guid ProductId { get; set; }
+        public string ProductName { get; set; }
+
+    }
 }

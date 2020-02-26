@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MRS.Model;
 using MRS.Service;
+using MRS.Utils;
 using MRS.ViewModels;
 
 namespace MRS.Controllers
@@ -27,12 +28,13 @@ namespace MRS.Controllers
         }
 
         [HttpGet]
-        public ActionResult Get()
+        public ActionResult Get(string name,int index = 1 , int pageSize = 5)
         {
             try
             {
-                var products = _productService.GetProducts(p => !p.IsDelete).Select(p => p.Adapt<ProductVM>());
-                return Ok(products);
+                name = name != null ? name : "";
+                var products = _productService.GetProducts(p => !p.IsDelete && p.Name.Contains(name)).OrderByDescending(_ => _.DateCreated);
+                return Ok(products.ToPageList<ProductVM, Product>(index, pageSize));
             }
             catch (Exception ex)
             {

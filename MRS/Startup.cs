@@ -72,6 +72,9 @@ namespace MRS
             services.AddTransient<IOrderRepository, OrderRepository>();
             services.AddTransient<IOrderService, OrderService>();
 
+            services.AddTransient<IOrderDetailRepository, OrderDetailRepository>();
+            services.AddTransient<IOrderDetailService, OrderDetailService>();
+
             services.AddTransient<IFileService, FileService>();
             #endregion
 
@@ -98,7 +101,7 @@ namespace MRS
 
                 // User settings.
                 o.User.AllowedUserNameCharacters =
-                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/";
                 o.User.RequireUniqueEmail = false;
             });
             authBuilder = new IdentityBuilder(authBuilder.UserType, typeof(IdentityRole), authBuilder.Services);

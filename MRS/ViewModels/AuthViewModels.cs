@@ -8,10 +8,8 @@ namespace BpmnKit.BpmnViewModels
 {
     public class LoginMobiVM
     {
-        [Required]
         public string Username { get; set; }
 
-        [Required]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }
@@ -27,10 +25,8 @@ namespace BpmnKit.BpmnViewModels
 
     public class RegisterMobiVM
     {
-        [Required]
         public string Username { get; set; }
 
-        [Required]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }

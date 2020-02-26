@@ -32,8 +32,8 @@ namespace MRS.Model
     }
     public enum OrderStatus
     {
-        processing,
-        confirmed,
-        done
+        processing = 0,
+        confirmed = 1,
+        done = 2
     }
 }

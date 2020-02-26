@@ -51,7 +51,7 @@ namespace MRS.Service
             }
 
             
-            Order.Status = Int32.Parse(OrderStatus.processing.ToString());
+            Order.Status = (int)OrderStatus.processing;
             Order.Price = price;
             Order.DateCreated = DateTime.Now;
             Order.UserCreated = username;
@@ -60,7 +60,6 @@ namespace MRS.Service
             //update cart
             foreach (var cart in carts)
             {
-                cart.Status = Int32.Parse(CartStatus.ordered.ToString());
                 cart.UserUpdated = username;
                 cart.DateUpdated = DateTime.Now;
                 AutoUpdateWarehouse(cart.WareHouse,null, cart.Quantity, null);

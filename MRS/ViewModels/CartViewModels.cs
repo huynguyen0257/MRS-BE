@@ -15,13 +15,8 @@ namespace MRS.ViewModels
 
     public class CartCM //Nho lay User ra
     {
-        public CartCM()
-        {
-            Status = 0;
-        }
         public Guid ProductId { get; set; }
         public int Quantity { get; set; }
-        public int Status { get; set; }
     }
 
     public class CartUM
@@ -40,7 +35,7 @@ namespace MRS.ViewModels
         public string FullName { get; set; }
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
-        public string Price { get; set; }
+        public float Price { get; set; }
         public string Note { get; set; }
     }
 }
