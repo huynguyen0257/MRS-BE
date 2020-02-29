@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MRS.Model;
 using MRS.Service;
+using MRS.Utils;
 using MRS.ViewModels;
 
 namespace MRS.Controllers
@@ -59,7 +60,7 @@ namespace MRS.Controllers
         }
 
         [HttpGet("{id}/Products")]
-        public ActionResult GetProductByCateId(Guid id)
+        public ActionResult GetProductByCateId(Guid id,int index = 1, int pageSize = 10)
         {
             var result = new List<ProductVM>();
             var category = _categoryService.GetCategory(id);
@@ -67,14 +68,7 @@ namespace MRS.Controllers
             {
                 try
                 {
-                    category.Products.ToList().ForEach(c =>
-                    {
-                        result.Add(new ProductVM{
-                            Name = c.Name,
-                            NumberOfLike = c.NumberOfLike,
-                            Price = c.Price
-                        });
-                    });
+                    return Ok(category.Products.ToPageList<ProductVM, Product>(index,pageSize));
                 }
                 catch (Exception ex)
                 {
@@ -85,7 +79,6 @@ namespace MRS.Controllers
             {
                 return NotFound();
             }
-            return Ok(result);
         }
 
         [HttpPost]

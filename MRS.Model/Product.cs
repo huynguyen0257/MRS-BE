@@ -15,6 +15,8 @@ namespace MRS.Model
         public float Price { get; set; }
         public string Description { get; set; }
         public int NumberOfLike { get; set; }
+        public string MainImage { get; set; }
+        public string Images { get; set; }
         public bool IsDelete { get; set; }
         public DateTime DateCreated { get; set; }
         public string UserCreated { get; set; }

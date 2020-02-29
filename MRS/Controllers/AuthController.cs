@@ -81,9 +81,9 @@ namespace BpmnKit.PhapYControllers
             claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
             //create token
             var token = new JwtSecurityToken(
-                    issuer: "dongtv",
+                    issuer: "huyng",
                     audience: user.FullName,
-                    expires: DateTime.Now.AddDays(1),
+                    expires: DateTime.Now.AddHours(1),
                     signingCredentials: signingCredentials,
                     claims: claims
                 );
@@ -93,7 +93,7 @@ namespace BpmnKit.PhapYControllers
                 roles = _userManager.GetRolesAsync(user).Result.ToArray(),
                 fullname = user.FullName,
                 access_token = new JwtSecurityTokenHandler().WriteToken(token),
-                expires_in = (int)TimeSpan.FromDays(1).TotalSeconds
+                expires_in = (int)TimeSpan.FromHours(1).TotalSeconds
             };
         }
         //tự đăng kí

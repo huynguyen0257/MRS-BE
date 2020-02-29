@@ -3,17 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MRS.Model;
 using MRS.Service;
 using MRS.Utils;
 using MRS.ViewModels;
+using Newtonsoft.Json;
 
 namespace MRS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class ProductController : ControllerBase
     {
         public class Error
@@ -21,14 +25,18 @@ namespace MRS.Controllers
             public string Message { get; set; }
         }
         private readonly IProductService _productService;
+        private readonly UserManager<User> _userManager;
+        private readonly IFileService _fileService;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, UserManager<User> userManager, IFileService fileService)
         {
             _productService = productService;
+            _userManager = userManager;
+            _fileService = fileService;
         }
 
         [HttpGet]
-        public ActionResult Get(string name,int index = 1 , int pageSize = 5)
+        public ActionResult Get(string name, int index = 1, int pageSize = 5)
         {
             try
             {
@@ -40,7 +48,7 @@ namespace MRS.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            
+
         }
 
         [HttpGet("{id}")]
@@ -57,12 +65,27 @@ namespace MRS.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [HttpGet("Images")]
+        public async Task<ActionResult> GetImages(string fileName)
+        {
+            try
+            {
+                var result = new List<FileStreamResult>();
+                var file = await _fileService.GetFileAsync(fileName);
+                return File(file.Stream, file.ContentType);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
             }
         }
 
         [HttpPost]
-        public ActionResult Create(ProductCM model)
+        public ActionResult Create([FromBody]ProductCM model)
         {
             try
             {
@@ -73,9 +96,9 @@ namespace MRS.Controllers
                     Quantity = model.Quantity,
                     Avaiable = model.Quantity
                 };
-                _productService.CreateProduct(product,null);
+                _productService.CreateProduct(product, _userManager.GetUserAsync(User).Result.FullName);
                 _productService.SaveProduct();
-                return StatusCode(201);
+                return StatusCode(201, product.Id);
             }
             catch (Exception ex)
             {
@@ -106,7 +129,7 @@ namespace MRS.Controllers
                         warehouse.Quantity = model.Quantity;
                         warehouse.Avaiable = avaiable;
                     }
-                    _productService.EditProduct(product,null);
+                    _productService.EditProduct(product, null);
                     _productService.SaveProduct();
                 }
                 else
@@ -128,6 +151,49 @@ namespace MRS.Controllers
             }
         }
 
+        [HttpPut("Images")]
+        public ActionResult UpdateloadImages([FromForm]List<IFormFile> images, Guid id, bool isMain = true)
+        {
+            try
+            {
+                var product = _productService.GetProduct(id);
+                List<string> imageNames = new List<string>();
+                //Images
+                if (isMain)
+                {
+                    var oldMainImage = product.MainImage;
+                    var image = images.FirstOrDefault();
+                    var filename = _fileService.SaveFile(FilePath.product, image);
+                    product.MainImage = filename.Result;
+                    if (oldMainImage != null)
+                    {
+                        _fileService.DeleteFile(oldMainImage);
+                    }
+                }
+                else
+                {
+                    foreach (var image in images)
+                    {
+                        var filename = _fileService.SaveFile(FilePath.product, image);
+                        imageNames.Add(filename.Result);
+                    }
+                    var oldImageNames = JsonConvert.DeserializeObject<List<string>>(product.Images);
+                    foreach (var oldImageName in oldImageNames)
+                    {
+                        _fileService.DeleteFile(oldImageName);
+                    }
+                    product.Images = JsonConvert.SerializeObject(imageNames);
+                }
+                _productService.EditProduct(product, _userManager.GetUserAsync(User).Result.FullName);
+                _productService.SaveProduct();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
         [HttpDelete("{id}")]
         public ActionResult Delete(Guid id)
         {
@@ -136,8 +202,15 @@ namespace MRS.Controllers
                 var product = _productService.GetProduct(id);
                 if (product != null)
                 {
-                    _productService.RemoveProduct(product,null);
+                    var mainImages = product.MainImage;
+                    var images = JsonConvert.DeserializeObject<List<string>>(product.Images);
+                    _productService.RemoveProduct(product, _userManager.GetUserAsync(User).Result.FullName);
                     _productService.SaveProduct();
+                    _fileService.DeleteFile(mainImages);
+                    foreach (var image in images)
+                    {
+                        _fileService.DeleteFile(image);
+                    }
                     return Ok();
                 }
                 else

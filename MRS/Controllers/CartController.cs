@@ -68,7 +68,7 @@ namespace MRS.Controllers
 
         [Authorize]
         [HttpPost("LIST")]
-        public ActionResult Create(List<CartCM> models)
+        public ActionResult Create([FromBody]List<CartCM> models)
         {
             List<Guid> ids = new List<Guid>();
             try

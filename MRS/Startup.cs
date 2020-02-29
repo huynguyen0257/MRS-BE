@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -95,7 +96,7 @@ namespace MRS
                 o.Password.RequiredUniqueChars = 0;
 
                 // Lockout settings.
-                o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
                 o.Lockout.MaxFailedAccessAttempts = 5;
                 o.Lockout.AllowedForNewUsers = true;
 
@@ -133,6 +134,7 @@ namespace MRS
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(securityKey)),
                     ValidateIssuer = false,
                     ValidateAudience = false,
+                    ValidateLifetime = true,
                     ValidIssuer = securityKey,
                     ValidAudience = securityKey
                 };
@@ -171,11 +173,15 @@ namespace MRS
                 builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().AllowCredentials()
             ));
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1).AddJsonOptions(options =>
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(options =>
             {
                 options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            }); ;
+            });
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.SameSite = SameSiteMode.None;
+            });
 
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace MRS.ViewModels
 {
@@ -10,6 +11,7 @@ namespace MRS.ViewModels
         public Guid Id { get; set; }
         public string Name { get; set; }
         public float Price { get; set; }
+        public string MainImage { get; set; }
         public int NumberOfLike { get; set; }
     }
     
@@ -19,6 +21,7 @@ namespace MRS.ViewModels
         public int Avaiable { get; set; }
         public int Ordered { get; set; }
         public int Purchased { get; set; }
+        public List<string> Images { get; set; }
         public DateTime DateCreated { get; set; }
 
     }

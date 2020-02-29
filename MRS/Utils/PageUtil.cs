@@ -41,6 +41,32 @@ namespace MRS.Utils
             };
         }
 
+        public static PageModel<U> ToPageList<U>(this List<U> list, int index = 1, int pageSize = 5)
+        {
+            int total = list.Count();
+            if (total == 0) return new PageModel<U>
+            {
+                Index = index,
+                Left = 0,
+                Right = 0,
+                List = new List<U>(),
+                Total = 0
+            };
+            List<U> result = list.Skip((index - 1) * pageSize).Take(pageSize).ToList();
+            int left = Math.Max(index - 2, 1);
+            int right = Math.Min(left + 4, (int)Math.Ceiling(1.0 * total / pageSize));
+            left = Math.Max(1, Math.Min(right - 4, left));
+
+            return new PageModel<U>
+            {
+                Index = index,
+                Left = left,
+                Right = right,
+                List = result,
+                Total = total
+            };
+        }
+
         public class PageModel<T>
         {
             public ICollection<T> List { get; set; }

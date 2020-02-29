@@ -4,14 +4,16 @@ using MRS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MRS.Data.Migrations
 {
     [DbContext(typeof(MRSContext))]
-    partial class MRSContextModelSnapshot : ModelSnapshot
+    [Migration("20200229053037_UpdateProduct-huy29022020")]
+    partial class UpdateProducthuy29022020
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
