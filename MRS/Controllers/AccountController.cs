@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BpmnKit.ViewModels;
+using MRS.ViewModels;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -41,6 +41,22 @@ namespace MRS.Controllers
             var data = _roleManager.Roles.Where(_ => !roleNames.Contains(_.Name)).Adapt<List<BaseRoleVM>>();
             return Ok(data);
         }
+
+        [HttpGet("Rank")]
+        public ActionResult GetRanks()
+        {
+            return Ok(new { Ranks = Enum.GetNames(typeof(UserLevel)) });
+        }
+
+        [HttpGet("Device_idOfAdmin")]
+        public ActionResult GetDeviceIdOfAdmin()
+        {
+            var admins = _userManager.GetUsersInRoleAsync(nameof(UserRoles.Admin));
+
+            return Ok(new {Device_Ids = admins.Result.Select(_ => _.Device_Id) });
+        }
+
+
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAccountById(String id)
         {
@@ -56,6 +72,8 @@ namespace MRS.Controllers
 
             return Ok(result);
         }
+
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public ActionResult GetAllUsers()
         {
@@ -68,12 +86,10 @@ namespace MRS.Controllers
         public ActionResult GetProfile()
         {
             var user = _userManager.GetUserAsync(User).Result;
-            //var result = user.Adapt<AccountVM>();
-            //if (result.AcademicRank != null)
-            //    result.AcademicRank = string.Concat(result.AcademicRank.Select(c => char.IsUpper(c) ? c.ToString() : ""));
             return Ok(user.Adapt<AccountVM>());
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> CreateAccount(AccountCM model)
         {
@@ -107,6 +123,7 @@ namespace MRS.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("Role")]
         public async Task<ActionResult> CreateRolesAsync([FromBody]BaseRoleCM model)
         {
@@ -126,7 +143,6 @@ namespace MRS.Controllers
         }
 
         //create account with role. except admin
-
         [Authorize]
         [HttpPut]
         public async Task<ActionResult> UpdateAccount(AccountUM model)
@@ -143,10 +159,45 @@ namespace MRS.Controllers
                 {
                     return BadRequest(currentAccount.Errors);
                 }
-                var oldRole = await _userManager.GetRolesAsync(user);
-                await _userManager.RemoveFromRolesAsync(user, oldRole);
-                await _userManager.AddToRoleAsync(user, nameof(UserRoles.Customer));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            return Ok();
+        }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPut("Rank")]
+        public async Task<ActionResult> UpdateUserRank(string rank, string userId)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) return NotFound();
+                user.DateUpdated = DateTime.Now;
+                user.UserUpdated = user.UserName;
+                if (rank.ToLower().Contains(nameof(UserLevel.Member).ToLower()))
+                {
+                    user.Level = (int)UserLevel.Member;
+                }
+                else if (rank.ToLower().Contains(nameof(UserLevel.Gold).ToLower()))
+                {
+                    user.Level = (int)UserLevel.Gold;
+                }
+                else if (rank.ToLower().Contains(nameof(UserLevel.Platinum).ToLower()))
+                {
+                    user.Level = (int)UserLevel.Platinum;
+                }
+                else
+                {
+                    return BadRequest(new { Messages = "Rank Not exist!" });
+                }
+                var currentAccount = await _userManager.UpdateAsync(user);
+                if (!currentAccount.Succeeded)
+                {
+                    return BadRequest(currentAccount.Errors);
+                }
             }
             catch (Exception e)
             {
@@ -172,6 +223,7 @@ namespace MRS.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("Avatar")]
         public async Task<ActionResult> GetAvatar()
         {
@@ -190,6 +242,7 @@ namespace MRS.Controllers
             return File(result.Stream, result.ContentType);
         }
 
+        [Authorize]
         [HttpPut("Avatar")]
         public async Task<ActionResult> UpdateAvatar([FromForm]IFormFile avt)
         {
@@ -203,6 +256,7 @@ namespace MRS.Controllers
         }
 
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("Role")]
         public async Task<ActionResult> UpdateRoleAsync([FromBody]BaseRoleUM model)
         {

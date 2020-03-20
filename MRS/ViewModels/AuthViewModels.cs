@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BpmnKit.BpmnViewModels
+namespace MRS.BpmnViewModels
 {
     public class LoginMobiVM
     {
@@ -20,7 +20,9 @@ namespace BpmnKit.BpmnViewModels
         public string[] roles { get; set; }
         public string fullname { get; set; }
         public string access_token { get; set; }
+        public string rank { get; set; }
         public int expires_in { get; set; }
+        public string Device_Id { get; set; }
     }
 
     public class RegisterMobiVM

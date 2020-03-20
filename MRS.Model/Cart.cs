@@ -21,8 +21,9 @@ namespace MRS.Model
 
         public Guid ProductId { get; set; }
         public string ProductName { get; set; }
+        public string ProductMainImage { get; set; }
 
-        #region relationship
+        #region relationship    
         public string UserId { get; set; }
         public virtual User User { get; set; }
         public Guid WareHouseId { get; set; }

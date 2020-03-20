@@ -28,6 +28,7 @@ namespace MRS.Model
         #region relationship
         public virtual ICollection<Cart> Carts { get; set; }
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        public virtual string UserId { get; set; }
         #endregion
     }
     public enum OrderStatus

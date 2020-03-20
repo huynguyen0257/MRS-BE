@@ -43,7 +43,14 @@ namespace MRS.Data.Migrations
                     AccessFailedCount = table.Column<int>(nullable: false),
                     FullName = table.Column<string>(nullable: true),
                     QRCode = table.Column<string>(nullable: true),
-                    Level = table.Column<int>(nullable: false)
+                    Level = table.Column<int>(nullable: false),
+                    Avatar = table.Column<string>(nullable: true),
+                    Account_Id = table.Column<string>(nullable: true),
+                    Device_Id = table.Column<string>(nullable: true),
+                    DateCreated = table.Column<DateTime>(nullable: false),
+                    UserCreated = table.Column<string>(nullable: true),
+                    DateUpdated = table.Column<DateTime>(nullable: true),
+                    UserUpdated = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -74,6 +81,8 @@ namespace MRS.Data.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     Title = table.Column<string>(nullable: true),
                     Content = table.Column<string>(nullable: true),
+                    Review = table.Column<string>(nullable: true),
+                    IsHided = table.Column<bool>(nullable: false),
                     DateCreated = table.Column<DateTime>(nullable: false),
                     UserCreated = table.Column<string>(nullable: true),
                     DateUpdated = table.Column<DateTime>(nullable: true),
@@ -89,7 +98,7 @@ namespace MRS.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    UserName = table.Column<string>(nullable: true),
+                    FullName = table.Column<string>(nullable: true),
                     Address = table.Column<string>(nullable: true),
                     PhoneNumber = table.Column<string>(nullable: true),
                     Price = table.Column<float>(nullable: false),
@@ -113,6 +122,7 @@ namespace MRS.Data.Migrations
                     PhoneNumber = table.Column<string>(nullable: true),
                     Address = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
+                    ActiveTime = table.Column<string>(nullable: true),
                     IsDelete = table.Column<bool>(nullable: false),
                     DateCreated = table.Column<DateTime>(nullable: false),
                     UserCreated = table.Column<string>(nullable: true),
@@ -260,6 +270,9 @@ namespace MRS.Data.Migrations
                     Name = table.Column<string>(nullable: true),
                     Price = table.Column<float>(nullable: false),
                     Description = table.Column<string>(nullable: true),
+                    NumberOfLike = table.Column<int>(nullable: false),
+                    MainImage = table.Column<string>(nullable: true),
+                    Images = table.Column<string>(nullable: true),
                     IsDelete = table.Column<bool>(nullable: false),
                     DateCreated = table.Column<DateTime>(nullable: false),
                     UserCreated = table.Column<string>(nullable: true),
@@ -290,6 +303,8 @@ namespace MRS.Data.Migrations
                     UserCreated = table.Column<string>(nullable: true),
                     DateUpdated = table.Column<DateTime>(nullable: true),
                     UserUpdated = table.Column<string>(nullable: true),
+                    ProductId = table.Column<Guid>(nullable: false),
+                    ProductName = table.Column<string>(nullable: true),
                     OrderId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
@@ -362,9 +377,11 @@ namespace MRS.Data.Migrations
                     UserCreated = table.Column<string>(nullable: true),
                     DateUpdated = table.Column<DateTime>(nullable: true),
                     UserUpdated = table.Column<string>(nullable: true),
+                    ProductId = table.Column<Guid>(nullable: false),
+                    ProductName = table.Column<string>(nullable: true),
                     UserId = table.Column<string>(nullable: true),
                     WareHouseId = table.Column<Guid>(nullable: false),
-                    OrderId = table.Column<Guid>(nullable: false)
+                    OrderId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {

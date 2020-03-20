@@ -2,22 +2,21 @@
 
 namespace MRS.Data.Migrations
 {
-    public partial class updateProduct : Migration
+    public partial class UpdateCartModel : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "NumberOfLike",
-                table: "Product",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.AddColumn<string>(
+                name: "ProductMainImage",
+                table: "Carts",
+                nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "NumberOfLike",
-                table: "Product");
+                name: "ProductMainImage",
+                table: "Carts");
         }
     }
 }

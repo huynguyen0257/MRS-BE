@@ -8,6 +8,7 @@ namespace MRS.ViewModels
         public Guid Id { get; set; }
         public Guid ProductId { get; set; }
         public string ProductName { get; set; }
+        public string ProductMainImage { get; set; }
         public DateTime DateCreated { get; set; }
         public int Quantity { get; set; }
         public float Price { get; set; }

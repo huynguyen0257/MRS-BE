@@ -21,6 +21,7 @@ namespace MRS.ViewModels
         public int Avaiable { get; set; }
         public int Ordered { get; set; }
         public int Purchased { get; set; }
+        public bool IsLiked { get; set; }
         public List<string> Images { get; set; }
         public DateTime DateCreated { get; set; }
 

@@ -17,7 +17,8 @@ namespace MRS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+
+    [Authorize(Roles = "Admin, Customer")]
     public class ProductController : ControllerBase
     {
         public class Error
@@ -35,6 +36,7 @@ namespace MRS.Controllers
             _fileService = fileService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public ActionResult Get(string name, int index = 1, int pageSize = 5)
         {
@@ -51,8 +53,34 @@ namespace MRS.Controllers
 
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public ActionResult GetDetail(Guid id)
+        {
+            var product = _productService.GetProduct(id);
+            try
+            {
+                if (product != null && !product.IsDelete)
+                {
+                    var result = product.Adapt<ProductDetailVM>();
+                    var user = _userManager.GetUserAsync(User).Result;
+                    if (user != null)
+                    {
+                        result.IsLiked = product.PopularProducts.Where(_ => _.UserId == user.Id).FirstOrDefault() != null;
+                    }
+                    return Ok(result);
+                }
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("{id}/CustomerLiked")]
+        public ActionResult GetCustomerLiked(Guid id)
         {
             var product = _productService.GetProduct(id);
             try
@@ -69,6 +97,23 @@ namespace MRS.Controllers
             }
         }
 
+        [Authorize(Roles = "Customer")]
+        [HttpGet("LikeByMyself")]
+        public ActionResult GetLikeByMyself(int index = 1, int pageSize = 5)
+        {
+            var user = _userManager.GetUserAsync(User).Result;
+            var products = _productService.GetProducts(_ => _.PopularProducts.Where(p => p.UserId == user.Id).FirstOrDefault() != null);
+            try
+            {
+                return Ok(products.ToPageList<ProductVM,Product>(index, pageSize));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
         [HttpGet("Images")]
         public async Task<ActionResult> GetImages(string fileName)
         {
@@ -84,6 +129,7 @@ namespace MRS.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public ActionResult Create([FromBody]ProductCM model)
         {
@@ -106,6 +152,7 @@ namespace MRS.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public ActionResult Update(ProductUM model)
         {
@@ -151,6 +198,45 @@ namespace MRS.Controllers
             }
         }
 
+        [Authorize(Roles = "Customer")]
+        [HttpPut("{id}/Like")]
+        public ActionResult Update(Guid id)
+        {
+            try
+            {
+                var product = _productService.GetProduct(id);
+                if (product == null && !product.IsDelete) return BadRequest(new { Message = "ProductId sai" });
+                if (product.PopularProducts == null)
+                {
+                    product.PopularProducts = new List<PopularProduct>();
+                }
+                var userId = _userManager.GetUserId(User);
+                var popularProduct = product.PopularProducts.Where(_ => _.UserId == userId && _.ProductId == product.Id).FirstOrDefault();
+                if (popularProduct != null)
+                {
+                    product.PopularProducts.Remove(popularProduct);
+                    product.NumberOfLike--;
+                }
+                else
+                {
+                    product.PopularProducts.Add(new PopularProduct
+                    {
+                        Product = product,
+                        UserId = _userManager.GetUserId(User)
+                    });
+                    product.NumberOfLike++;
+                }
+                _productService.EditProduct(product, null);
+                _productService.SaveProduct();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPut("Images")]
         public ActionResult UpdateloadImages([FromForm]List<IFormFile> images, Guid id, bool isMain = true)
         {
@@ -177,10 +263,13 @@ namespace MRS.Controllers
                         var filename = _fileService.SaveFile(FilePath.product, image);
                         imageNames.Add(filename.Result);
                     }
-                    var oldImageNames = JsonConvert.DeserializeObject<List<string>>(product.Images);
-                    foreach (var oldImageName in oldImageNames)
+                    if (product.Images != null)
                     {
-                        _fileService.DeleteFile(oldImageName);
+                        var oldImageNames = JsonConvert.DeserializeObject<List<string>>(product.Images);
+                        foreach (var oldImageName in oldImageNames)
+                        {
+                            _fileService.DeleteFile(oldImageName);
+                        }
                     }
                     product.Images = JsonConvert.SerializeObject(imageNames);
                 }
@@ -194,6 +283,7 @@ namespace MRS.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public ActionResult Delete(Guid id)
         {
@@ -203,14 +293,20 @@ namespace MRS.Controllers
                 if (product != null)
                 {
                     var mainImages = product.MainImage;
-                    var images = JsonConvert.DeserializeObject<List<string>>(product.Images);
+                    if (mainImages != null)
+                    {
+                        _fileService.DeleteFile(mainImages);
+                    }
+                    if (product.Images != null)
+                    {
+                        var images = JsonConvert.DeserializeObject<List<string>>(product.Images);
+                        foreach (var image in images)
+                        {
+                            _fileService.DeleteFile(image);
+                        }
+                    }
                     _productService.RemoveProduct(product, _userManager.GetUserAsync(User).Result.FullName);
                     _productService.SaveProduct();
-                    _fileService.DeleteFile(mainImages);
-                    foreach (var image in images)
-                    {
-                        _fileService.DeleteFile(image);
-                    }
                     return Ok();
                 }
                 else

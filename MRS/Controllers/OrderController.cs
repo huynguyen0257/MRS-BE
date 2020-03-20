@@ -14,7 +14,7 @@ using MRS.ViewModels;
 
 namespace MRS.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class OrderController : ControllerBase
@@ -32,7 +32,24 @@ namespace MRS.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet]
+        [Authorize]
+        [HttpGet("MySelf")]
+        public ActionResult GetMySelf(int index = 1, int pageSize = 5)
+        {
+            try
+            {
+                var user = _userManager.GetUserAsync(User).Result;
+                var orders = _OrderService.GetOrders(_ => _.Carts.Select(c => c.UserId).Contains(user.Id));
+                return Ok(orders.ToPageList<OrderVM, Order>(index, pageSize));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("All")]
         public ActionResult GetAll(bool IsConfirmed = false, int index = 1, int pageSize = 5)
         {
             try
@@ -52,6 +69,7 @@ namespace MRS.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public ActionResult Get(Guid id)
         {
@@ -77,6 +95,7 @@ namespace MRS.Controllers
                         }
                     }
                     result.CartVMs = carts;
+                    result.Device_Id = _userManager.FindByIdAsync(Order.UserId).Result.Device_Id;
                     return Ok(result);
                 }
                 catch (Exception ex)
@@ -90,6 +109,7 @@ namespace MRS.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("Confirm/{id}")]
         public ActionResult ConfirmOrder(Guid id)
         {
@@ -112,7 +132,8 @@ namespace MRS.Controllers
             }
         }
 
-        [HttpPut("Order/{id}")]
+        [Authorize(Roles = "Admin")]
+        [HttpPut("Done/{id}")]
         public ActionResult DoneOrder(Guid id)
         {
             try

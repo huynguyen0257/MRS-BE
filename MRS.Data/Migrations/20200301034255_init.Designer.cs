@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MRS.Data.Migrations
 {
     [DbContext(typeof(MRSContext))]
-    [Migration("20200225164526_ModifyModel")]
-    partial class ModifyModel
+    [Migration("20200301034255_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -142,7 +142,7 @@ namespace MRS.Data.Migrations
 
                     b.Property<DateTime?>("DateUpdated");
 
-                    b.Property<string>("Fullname");
+                    b.Property<string>("FullName");
 
                     b.Property<string>("Note");
 
@@ -173,6 +173,10 @@ namespace MRS.Data.Migrations
                     b.Property<Guid>("OrderId");
 
                     b.Property<float>("Price");
+
+                    b.Property<Guid>("ProductId");
+
+                    b.Property<string>("ProductName");
 
                     b.Property<int>("Quantity");
 
@@ -220,7 +224,11 @@ namespace MRS.Data.Migrations
 
                     b.Property<string>("Description");
 
+                    b.Property<string>("Images");
+
                     b.Property<bool>("IsDelete");
+
+                    b.Property<string>("MainImage");
 
                     b.Property<string>("Name");
 

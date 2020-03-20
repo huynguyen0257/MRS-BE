@@ -144,14 +144,15 @@ namespace MRS.Service
 
         public string GenerateFileName(string fileName)
         {
-            string result = new Random().Next(0, Int32.MaxValue) + DateTime.Now.ToString("dMyyyyhmmss") + CUT + fileName;
+            //string result = new Random().Next(0, Int32.MaxValue) + DateTime.Now.ToString("dMyyyyhmmss") + CUT + fileName;
+            string result = new Random().Next(0, Int32.MaxValue) + DateTime.Now.ToString("dMyyyyhmmss") + fileName;
             return result;
         }
 
         public string GetFileNameWithoutPrevious(string fileName)
         {
-            string result = fileName.Split(CUT)[fileName.Split(CUT).Length-1];
-            return result;
+            //string result = fileName.Split(CUT)[fileName.Split(CUT).Length-1];
+            return fileName;
         }
 
         public async Task<FileSupport> GetFileAsync(string pathFile)
@@ -186,9 +187,9 @@ namespace MRS.Service
                 }
                 return  Path.Combine(pathFolder,filename);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                return ex.Message + " - " + path;
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MRS.Model;
@@ -12,6 +13,7 @@ using MRS.ViewModels;
 
 namespace MRS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -23,6 +25,7 @@ namespace MRS.Controllers
             _categoryService = categoryService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public ActionResult GetAll()
         {
@@ -38,6 +41,7 @@ namespace MRS.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public ActionResult Get(Guid id)
         {
@@ -59,6 +63,7 @@ namespace MRS.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}/Products")]
         public ActionResult GetProductByCateId(Guid id,int index = 1, int pageSize = 10)
         {

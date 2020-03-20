@@ -36,12 +36,21 @@ namespace MRS.Controllers
         {
             try
             {
-                return Ok(_CartService.GetCarts(_ => _.UserId == _userManager.GetUserAsync(User).Result.Id).Select(c => c.Adapt<CartVM>()));
+                return Ok(_CartService.GetCarts(_ => _.UserId == _userManager.GetUserAsync(User).Result.Id && _.Status == (int)CartStatus.waiting && _.OrderId == null).Select(c => c.Adapt<CartVM>()));
             }
             catch (Exception ex)
             {
                 return BadRequest(new { Message = ex.Message });
             }
+        }
+
+        private bool IsExistedCart(Cart cart, Guid productId, string userId)
+        {
+            var result = cart.ProductId == productId;
+            result = result && cart.UserId.Contains(userId);
+            result = result && cart.Status == (int)CartStatus.waiting;
+            result = result && cart.OrderId == null;
+            return result;
         }
 
         [HttpPost]
@@ -50,11 +59,20 @@ namespace MRS.Controllers
             try
             {
                 var user = _userManager.GetUserAsync(User).Result;
+                var currentCart = _CartService.GetCarts(_ => IsExistedCart(_,model.ProductId,user.Id)).FirstOrDefault();
+                if (currentCart != null)
+                {
+                    //return BadRequest(new { Message = "User nay da add Product roi ==> Update Quantity di!" });
+                    currentCart.Quantity += model.Quantity;
+                    _CartService.EditCart(currentCart, user.FullName);
+                    _CartService.SaveCart();
+                    return Ok(new { Message = String.Format("Updated quantity for Fullname : {0}, ProductName: {1} ", user.FullName, currentCart.ProductName) });
+                }
+
                 var Cart = model.Adapt<Cart>();
                 Cart.DateCreated = DateTime.Now;
                 var warehouse = _wareHouseService.GetWareHouses(w => w.ProductId == model.ProductId).FirstOrDefault();
                 if (warehouse == null) return NotFound(new { Message = "Khong tim thay Product" });
-                if (_CartService.GetCarts(_ => _.ProductId == model.ProductId && _.UserId == user.Id).Count() != 0) return BadRequest(new { Message = "User nay da add Product roi ==> Update Quantity di!"});
                 Cart.WareHouse = warehouse;
                 _CartService.CreateCart(Cart, user.FullName, user.Id);
                 _CartService.SaveCart();
@@ -70,17 +88,24 @@ namespace MRS.Controllers
         [HttpPost("LIST")]
         public ActionResult Create([FromBody]List<CartCM> models)
         {
+            var user = _userManager.GetUserAsync(User).Result;
             List<Guid> ids = new List<Guid>();
             try
             {
-                var carts = models.Adapt<List<Cart>>();
+                var cartCheckeds = new List<CartCM>();
+                foreach (var model in models)
+                {
+                    if (cartCheckeds.Where(_ => _.ProductId == model.ProductId).FirstOrDefault() != null) cartCheckeds.Where(_ => _.ProductId == model.ProductId).FirstOrDefault().Quantity += model.Quantity;
+                    else cartCheckeds.Add(model);
+                    if (_CartService.GetCarts(_ => _.UserId == user.Id).FirstOrDefault() != null) return BadRequest(new { Message = "User have cart on System ... Take POST api/cart!" });
+                }
+                var carts = cartCheckeds.Adapt<List<Cart>>();
                 foreach (var cart in carts)
                 {
                     cart.DateCreated = DateTime.Now;
                     var warehouse = _wareHouseService.GetWareHouses(w => w.ProductId == cart.ProductId).FirstOrDefault();
                     if (warehouse == null) return NotFound(new { Message = "Khong tim thay Product" });
                     cart.WareHouse = warehouse;
-                    var user = _userManager.GetUserAsync(User).Result;
                     _CartService.CreateCart(cart, user.FullName, user.Id);
                     ids.Add(cart.Id);
                 }
@@ -115,20 +140,18 @@ namespace MRS.Controllers
             try
             {
                 var Cart = _CartService.GetCart(model.Id);
-                var oldQuantity = Cart.Quantity;
                 var user = _userManager.GetUserAsync(User).Result;
                 if (Cart != null)
                 {
                     Cart = model.Adapt(Cart);
-                    if (user != null)
-                    {
-                        _CartService.EditCart(Cart, user.FullName, oldQuantity);
-                    }
-                    else
-                    {
-                        _CartService.EditCart(Cart, null, oldQuantity);
-                    }
+                    _CartService.EditCart(Cart, user.FullName);
                     _CartService.SaveCart();
+                    var cartRemove = _CartService.GetCarts(_ => _.Quantity == 0).FirstOrDefault();
+                    if (cartRemove != null)
+                    {
+                        _CartService.RemoveCart(cartRemove);
+                        _CartService.SaveCart();
+                    }
                     return Ok();
                 }
                 else
@@ -171,6 +194,7 @@ namespace MRS.Controllers
         {
             try
             {
+                #region Check and Get cart
                 var cart = _CartService.GetCarts(_ => model.CartIds.Contains(_.Id)).ToList();
                 if (cart.Count() != model.CartIds.Count)
                 {
@@ -184,7 +208,10 @@ namespace MRS.Controllers
                         return BadRequest(new { Message = "CartId not exist : " + idError });
                     }
                 }
+                #endregion
+                if (cart.Where(_ => _.OrderId != null).FirstOrDefault() != null) return BadRequest(new { Message = "Have 1 or more carts have been ordered" });
                 var order = model.Adapt<Order>();
+                order.UserId = cart.FirstOrDefault().UserId;
                 order.Carts = cart;
                 _orderService.CreateOrder(order, _userManager.GetUserAsync(User).Result.FullName);
                 _orderService.SaveOrder();

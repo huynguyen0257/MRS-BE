@@ -2,21 +2,21 @@
 
 namespace MRS.Data.Migrations
 {
-    public partial class UpdateShopModel : Migration
+    public partial class UpdateOrderModel : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "ActiveTime",
-                table: "Shop",
+                name: "UserId",
+                table: "Order",
                 nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "ActiveTime",
-                table: "Shop");
+                name: "UserId",
+                table: "Order");
         }
     }
 }

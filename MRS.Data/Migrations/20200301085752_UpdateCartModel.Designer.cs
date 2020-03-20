@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MRS.Data.Migrations
 {
     [DbContext(typeof(MRSContext))]
-    [Migration("20200217095307_init")]
-    partial class init
+    [Migration("20200301085752_UpdateCartModel")]
+    partial class UpdateCartModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.6-servicing-10079")
+                .HasAnnotation("ProductVersion", "2.2.0-rtm-35687")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -30,9 +30,15 @@ namespace MRS.Data.Migrations
 
                     b.Property<DateTime?>("DateUpdated");
 
-                    b.Property<Guid>("OrderId");
+                    b.Property<Guid?>("OrderId");
 
                     b.Property<float>("Price");
+
+                    b.Property<Guid>("ProductId");
+
+                    b.Property<string>("ProductMainImage");
+
+                    b.Property<string>("ProductName");
 
                     b.Property<int>("Quantity");
 
@@ -112,6 +118,10 @@ namespace MRS.Data.Migrations
 
                     b.Property<DateTime?>("DateUpdated");
 
+                    b.Property<bool>("IsHided");
+
+                    b.Property<string>("Review");
+
                     b.Property<string>("Title");
 
                     b.Property<string>("UserCreated");
@@ -134,6 +144,8 @@ namespace MRS.Data.Migrations
 
                     b.Property<DateTime?>("DateUpdated");
 
+                    b.Property<string>("FullName");
+
                     b.Property<string>("Note");
 
                     b.Property<string>("PhoneNumber");
@@ -143,8 +155,6 @@ namespace MRS.Data.Migrations
                     b.Property<int>("Status");
 
                     b.Property<string>("UserCreated");
-
-                    b.Property<string>("UserName");
 
                     b.Property<string>("UserUpdated");
 
@@ -165,6 +175,10 @@ namespace MRS.Data.Migrations
                     b.Property<Guid>("OrderId");
 
                     b.Property<float>("Price");
+
+                    b.Property<Guid>("ProductId");
+
+                    b.Property<string>("ProductName");
 
                     b.Property<int>("Quantity");
 
@@ -212,9 +226,15 @@ namespace MRS.Data.Migrations
 
                     b.Property<string>("Description");
 
+                    b.Property<string>("Images");
+
                     b.Property<bool>("IsDelete");
 
+                    b.Property<string>("MainImage");
+
                     b.Property<string>("Name");
+
+                    b.Property<int>("NumberOfLike");
 
                     b.Property<float>("Price");
 
@@ -233,6 +253,8 @@ namespace MRS.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ActiveTime");
 
                     b.Property<string>("Address");
 
@@ -262,8 +284,18 @@ namespace MRS.Data.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
+                    b.Property<string>("Account_Id");
+
+                    b.Property<string>("Avatar");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
+
+                    b.Property<DateTime>("DateCreated");
+
+                    b.Property<DateTime?>("DateUpdated");
+
+                    b.Property<string>("Device_Id");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256);
@@ -296,8 +328,12 @@ namespace MRS.Data.Migrations
 
                     b.Property<bool>("TwoFactorEnabled");
 
+                    b.Property<string>("UserCreated");
+
                     b.Property<string>("UserName")
                         .HasMaxLength(256);
+
+                    b.Property<string>("UserUpdated");
 
                     b.HasKey("Id");
 

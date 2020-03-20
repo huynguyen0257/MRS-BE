@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BpmnKit.ViewModels
+namespace MRS.ViewModels
 {
 	public class AccountCM
 	{
@@ -21,9 +21,9 @@ namespace BpmnKit.ViewModels
         public string UserName { get; set; }
         public string FullName { get; set; }
         public string Email { get; set; }
-        public string Password { get; set; }
         public string PhoneNumber { get; set; }
-
+        public string Device_Id { get; set; }
+        public string Rank { get; set; }
     }
     public class AccountVMById
     {
@@ -32,17 +32,17 @@ namespace BpmnKit.ViewModels
         public string FullName { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+        public string Device_Id { get; set; }
+        public string Rank { get; set; }
         public IList<string> Roles { get; set; }
-
     }
 
     public class AccountUM
 	{
 		public string FullName { get; set; }
 		public string Email { get; set; }
-		public string Password { get; set; }
 		public string PhoneNumber { get; set; }
-
+		public string Device_Id { get; set; }
     }
 
     public class PasswordVM

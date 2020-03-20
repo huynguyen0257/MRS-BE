@@ -5,7 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using BpmnKit.BpmnViewModels;
+using MRS.BpmnViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +15,7 @@ using MRS.Model;
 using MRS.Utils;
 using Newtonsoft.Json;
 
-namespace BpmnKit.PhapYControllers
+namespace MRS.PhapYControllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -92,9 +92,27 @@ namespace BpmnKit.PhapYControllers
             {
                 roles = _userManager.GetRolesAsync(user).Result.ToArray(),
                 fullname = user.FullName,
+                rank = GetUserLevelString(user.Level),
+                Device_Id = user.Device_Id,
                 access_token = new JwtSecurityTokenHandler().WriteToken(token),
                 expires_in = (int)TimeSpan.FromHours(1).TotalSeconds
             };
+        }
+
+        public string GetUserLevelString(int i)
+        {
+            if (i == (int)UserLevel.Gold)
+            {
+                return nameof(UserLevel.Gold);
+            }
+            else if (i == (int)UserLevel.Member)
+            {
+                return nameof(UserLevel.Member);
+            }
+            else
+            {
+                return nameof(UserLevel.Platinum);
+            }
         }
         //tự đăng kí
         [HttpPost("Register")]
@@ -104,7 +122,7 @@ namespace BpmnKit.PhapYControllers
             {
                 User user;
                 string password;
-                if (model.Username == null && model.Password == null && model.Account_Id ==null)
+                if (model.Username == null && model.Password == null && model.Account_Id == null)
                 {
                     return BadRequest(new { Message = "UserName,Password,Account_ID???" });
                 }
@@ -112,7 +130,7 @@ namespace BpmnKit.PhapYControllers
                 {
                     user = new User()
                     {
-                        UserName = model.Email+DateTime.Now.Date.ToShortDateString(),
+                        UserName = model.Email + DateTime.Now.Date.ToShortDateString(),
                         Email = model.Email,
                         FullName = model.Fullname,
                         Account_Id = model.Account_Id,

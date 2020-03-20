@@ -14,7 +14,7 @@ namespace MRS.Service
         IEnumerable<Cart> GetCarts(Expression<Func<Cart, bool>> where);
         Cart GetCart(Guid id);
         void CreateCart(Cart Cart, string username, string userId);
-        void EditCart(Cart Cart, string username, int oldQuantity);
+        void EditCart(Cart Cart, string username);
         void RemoveCart(Cart Cart);
         void RemoveCart(Guid id);
         void SaveCart();
@@ -49,7 +49,7 @@ namespace MRS.Service
             _CartRepository.Add(Cart);
         }
 
-        public void EditCart(Cart Cart, string username, int oldQuantity)
+        public void EditCart(Cart Cart, string username)
         {
             var warehouse = Cart.WareHouse;
             if (Cart.Quantity > warehouse.Avaiable)
@@ -94,6 +94,7 @@ namespace MRS.Service
             Cart.Price = product.Price * Cart.Quantity;
             Cart.ProductId = product.Id;
             Cart.ProductName = product.Name;
+            Cart.ProductMainImage = product.MainImage;
         }
 
         public void RemoveCart(Guid id)
