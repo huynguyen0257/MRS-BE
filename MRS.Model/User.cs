@@ -17,6 +17,7 @@ namespace MRS.Model
         public string UserCreated { get; set; }
         public DateTime? DateUpdated { get; set; }
         public string UserUpdated { get; set; }
+        public int Score { get; set; }
 
         #region relationship
         public virtual ICollection<Cart> Carts { get; set; }

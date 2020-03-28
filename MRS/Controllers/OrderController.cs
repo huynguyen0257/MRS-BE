@@ -132,9 +132,21 @@ namespace MRS.Controllers
             }
         }
 
+        private int GetScore(float totalPrice)
+        {
+            if (totalPrice > 0)
+            {
+                return (int)totalPrice / 10000;
+            }
+            else
+            {
+                throw new Exception("TotalPrice = 0");
+            }
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpPut("Done/{id}")]
-        public ActionResult DoneOrder(Guid id)
+        public async Task<ActionResult> DoneOrderAsync(Guid id)
         {
             try
             {
@@ -145,7 +157,23 @@ namespace MRS.Controllers
                     return BadRequest(new { Message = "Order Status != Confimed" });
                 }
 
-                var username = _userManager.GetUserAsync(User).Result.FullName;
+                //Update User's Score and level
+                var user = _userManager.GetUserAsync(User).Result;
+                user.Score += GetScore(order.Price);
+                if (user.Level == (int)UserLevel.Member)
+                {
+                    user.Level = user.Score >= 200 ? (int)UserLevel.Gold : (int)UserLevel.Member;
+                }
+                else if (user.Level == (int)UserLevel.Gold)
+                {
+                    user.Level = user.Score >= 400 ? (int)UserLevel.Platinum : (int)UserLevel.Gold;
+                }
+                var update = await _userManager.UpdateAsync(user);
+                if (!update.Succeeded)
+                {
+                    return BadRequest(new { Message = "Update user fail!" });
+                }
+
                 //Update Order
                 order.Status = (int)OrderStatus.done;
 
@@ -158,7 +186,7 @@ namespace MRS.Controllers
                     _cartService.RemoveCart(cart);
                 }
                 order.OrderDetails = orderDetails;
-                _OrderService.EditOrder(order, username);
+                _OrderService.EditOrder(order, user.FullName);
                 _OrderService.SaveOrder();
 
                 //Update Warehouse

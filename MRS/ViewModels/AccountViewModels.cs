@@ -24,6 +24,7 @@ namespace MRS.ViewModels
         public string PhoneNumber { get; set; }
         public string Device_Id { get; set; }
         public string Rank { get; set; }
+        public int Score { get; set; }
     }
     public class AccountVMById
     {
@@ -34,6 +35,7 @@ namespace MRS.ViewModels
         public string PhoneNumber { get; set; }
         public string Device_Id { get; set; }
         public string Rank { get; set; }
+        public int Score { get; set; }
         public IList<string> Roles { get; set; }
     }
 

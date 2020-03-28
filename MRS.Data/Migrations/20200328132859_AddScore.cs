@@ -2,21 +2,22 @@
 
 namespace MRS.Data.Migrations
 {
-    public partial class UpdateCartModel : Migration
+    public partial class AddScore : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "ProductMainImage",
-                table: "Carts",
-                nullable: true);
+            migrationBuilder.AddColumn<int>(
+                name: "Score",
+                table: "AspNetUsers",
+                nullable: false,
+                defaultValue: 0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "ProductMainImage",
-                table: "Carts");
+                name: "Score",
+                table: "AspNetUsers");
         }
     }
 }
