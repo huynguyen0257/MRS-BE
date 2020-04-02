@@ -109,7 +109,7 @@ namespace MRS.Service
         /// <param name="increaseQuantity">Update so luong</param>
         private void AutoUpdateWarehouse(WareHouse wareHouse, int? returnQuantity, int? orderQuantity, int? purchaseQuantity)
         {
-            if (returnQuantity != null)  //tra đặt hàng
+            if (returnQuantity != null)  //từ chối đặt hàng
             {
                 wareHouse.Avaiable = wareHouse.Avaiable + returnQuantity.Value;
                 wareHouse.Ordered = wareHouse.Ordered - returnQuantity.Value;

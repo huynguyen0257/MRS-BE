@@ -92,6 +92,7 @@ namespace MRS.PhapYControllers
             {
                 roles = _userManager.GetRolesAsync(user).Result.ToArray(),
                 fullname = user.FullName,
+                score = user.Score,
                 rank = GetUserLevelString(user.Level),
                 Device_Id = user.Device_Id,
                 access_token = new JwtSecurityTokenHandler().WriteToken(token),

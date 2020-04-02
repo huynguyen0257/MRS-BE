@@ -19,16 +19,18 @@ namespace MRS.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly IOrderService _OrderService;
+        private readonly IOrderService _orderService;
         private readonly ICartService _cartService;
         private readonly IOrderDetailService _orderDetailService;
+        private readonly IWareHouseService _wareHouseService;
         private readonly UserManager<User> _userManager;
 
-        public OrderController(IOrderService orderService, ICartService cartService, IOrderDetailService orderDetailService, UserManager<User> userManager)
+        public OrderController(IOrderService orderService, ICartService cartService, IOrderDetailService orderDetailService, IWareHouseService wareHouseService, UserManager<User> userManager)
         {
-            _OrderService = orderService;
-            this._cartService = cartService;
+            _orderService = orderService;
+            _cartService = cartService;
             _orderDetailService = orderDetailService;
+            _wareHouseService = wareHouseService;
             _userManager = userManager;
         }
 
@@ -39,7 +41,7 @@ namespace MRS.Controllers
             try
             {
                 var user = _userManager.GetUserAsync(User).Result;
-                var orders = _OrderService.GetOrders(_ => _.Carts.Select(c => c.UserId).Contains(user.Id));
+                var orders = _orderService.GetOrders(_ => _.UserId  .Contains(user.Id));
                 return Ok(orders.ToPageList<OrderVM, Order>(index, pageSize));
             }
             catch (Exception ex)
@@ -50,17 +52,17 @@ namespace MRS.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("All")]
-        public ActionResult GetAll(bool IsConfirmed = false, int index = 1, int pageSize = 5)
+        public ActionResult GetAll(int? type, int index = 1, int pageSize = 5)
         {
             try
             {
-                if (IsConfirmed)
+                if (type == null)
                 {
-                    return Ok(_OrderService.GetOrders(_ => _.Status != (int)OrderStatus.processing).ToPageList<OrderVM,Order>(index,pageSize));
+                    return Ok(_orderService.GetOrders().ToPageList<OrderVM,Order>(index,pageSize));
                 }
-                else
+                else 
                 {
-                    return Ok(_OrderService.GetOrders(_ => _.Status == (int)OrderStatus.processing).ToPageList<OrderVM, Order>(index, pageSize));
+                    return Ok(_orderService.GetOrders(_ => _.Status == type).ToPageList<OrderVM, Order>(index, pageSize));
                 }
             }
             catch (Exception ex)
@@ -73,7 +75,7 @@ namespace MRS.Controllers
         [HttpGet("{id}")]
         public ActionResult Get(Guid id)
         {
-            var Order = _OrderService.GetOrder(id);
+            var Order = _orderService.GetOrder(id);
             if (Order != null)
             {
                 var result = Order.Adapt<OrderDetailVM>();
@@ -115,15 +117,54 @@ namespace MRS.Controllers
         {
             try
             {
-                var order = _OrderService.GetOrder(id);
+                var order = _orderService.GetOrder(id);
                 if (order == null) return NotFound(new { Message = "Khong tim thay Order" });
                 order.Status = (int)OrderStatus.confirmed;
                 foreach (var cart in order.Carts)
                 {
                     cart.Status = (int)CartStatus.ordered;
                 }
-                _OrderService.EditOrder(order, _userManager.GetUserAsync(User).Result.FullName);
-                _OrderService.SaveOrder();
+                _orderService.EditOrder(order, _userManager.GetUserAsync(User).Result.FullName);
+                _orderService.SaveOrder();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("Refuse/{id}")]
+        public ActionResult RefuseOrder(Guid id)
+        {
+            try
+            {
+                var order = _orderService.GetOrder(id);
+                if (order == null) return NotFound(new { Message = "Khong tim thay Order" });
+                order.Status = (int)OrderStatus.refuse;
+                foreach (var cart in order.Carts)
+                {
+                    cart.Status = (int)CartStatus.refused;
+                }
+                _orderService.EditOrder(order, _userManager.GetUserAsync(User).Result.FullName);
+                _orderService.SaveOrder();
+
+                //Update Warehouse
+                var carts = order.Carts;
+                var warehouses = carts.Select(_ => _.WareHouse).ToList();
+                foreach (var warehouse in warehouses)
+                {
+                    var quantity = carts.Where(_ => _.ProductId == warehouse.ProductId).Select(_ => _.Quantity).FirstOrDefault();
+                    if (quantity == 0)
+                    {
+                        return BadRequest(new { Message = warehouse.Id + " not exist or ProductId sai" });
+                    }
+                    warehouse.Avaiable = warehouse.Avaiable + quantity;
+                    warehouse.Ordered = warehouse.Ordered - quantity;
+                    _wareHouseService.EditWareHouse(warehouse);
+                }
+                _wareHouseService.SaveWareHouse();
                 return Ok();
             }
             catch (Exception ex)
@@ -150,7 +191,7 @@ namespace MRS.Controllers
         {
             try
             {
-                var order = _OrderService.GetOrder(id);
+                var order = _orderService.GetOrder(id);
                 if (order == null) return NotFound(new { Message = "Khong tim thay Order" });
                 if (order.Status != (int)OrderStatus.confirmed)
                 {
@@ -181,13 +222,17 @@ namespace MRS.Controllers
                 var carts = order.Carts;
                 var warehouses = carts.Select(_ => _.WareHouse).ToList();
                 var orderDetails = carts.Adapt<List<OrderDetailsVM>>().Adapt<List<OrderDetail>>();
+                foreach (var orderDetail in orderDetails)
+                {
+                    orderDetail.Status = (int)CartStatus.done;
+                }
                 foreach (var cart in carts)
                 {
                     _cartService.RemoveCart(cart);
                 }
                 order.OrderDetails = orderDetails;
-                _OrderService.EditOrder(order, user.FullName);
-                _OrderService.SaveOrder();
+                _orderService.EditOrder(order, user.FullName);
+                _orderService.SaveOrder();
 
                 //Update Warehouse
                 foreach (var warehouse in warehouses)
@@ -199,7 +244,9 @@ namespace MRS.Controllers
                     }
                     warehouse.Purchased = warehouse.Purchased + quantity;
                     warehouse.Ordered = warehouse.Ordered + quantity;
+                    _wareHouseService.EditWareHouse(warehouse);
                 }
+                _wareHouseService.SaveWareHouse();
                 return Ok();
             }
             catch (Exception ex)

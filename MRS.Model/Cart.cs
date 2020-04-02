@@ -37,6 +37,8 @@ namespace MRS.Model
     public enum CartStatus
     {
         waiting,
-        ordered
+        ordered,
+        done,
+        refused
     }
 }

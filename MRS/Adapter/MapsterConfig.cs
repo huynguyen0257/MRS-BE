@@ -58,6 +58,10 @@ namespace MRS.Adapter
             {
                 return nameof(OrderStatus.done);
             }
+            else if(i == (int)OrderStatus.refuse)
+            {
+                return nameof(OrderStatus.refuse);
+            }
             else
             {
                 return "Order Status fail";

@@ -178,6 +178,8 @@ namespace MRS.Data.Migrations
 
                     b.Property<Guid>("ProductId");
 
+                    b.Property<string>("ProductMainImage");
+
                     b.Property<string>("ProductName");
 
                     b.Property<int>("Quantity");

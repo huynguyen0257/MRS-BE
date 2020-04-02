@@ -19,6 +19,7 @@ namespace MRS.BpmnViewModels
     {
         public string[] roles { get; set; }
         public string fullname { get; set; }
+        public int score { get; set; }
         public string access_token { get; set; }
         public string rank { get; set; }
         public int expires_in { get; set; }

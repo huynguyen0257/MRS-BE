@@ -35,6 +35,7 @@ namespace MRS.Model
     {
         processing = 0,
         confirmed = 1,
-        done = 2
+        done = 2,
+        refuse = 3
     }
 }
